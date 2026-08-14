@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17324d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MASTER Nutrisyon">
+<title>MASTER Yoğun Bakım Nutrisyon v5</title>
+<style>
+:root{--navy:#17324d;--teal:#0f766e;--green:#166534;--greenbg:#dcfce7;--amber:#92400e;--amberbg:#fef3c7;--red:#991b1b;--redbg:#fee2e2;--blue:#1d4ed8;--bluebg:#dbeafe;--line:#d0d5dd;--bg:#f4f7fa;--muted:#667085}
+*{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:#172033}
+header{background:linear-gradient(135deg,var(--navy),#245272);color:#fff;padding:20px 14px} header h1{margin:0;font-size:1.6rem} header p{margin:.4rem 0 0;color:#dbe7f1;font-size:.9rem}
+main{max-width:1500px;margin:14px auto;padding:0 10px 40px} .layout{display:grid;grid-template-columns:430px 1fr;gap:14px;align-items:start}
+.card{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-bottom:12px} .card-title{background:var(--teal);color:#fff;padding:10px 12px;font-weight:800}
+.body{padding:12px} .form{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px} .full{grid-column:1/-1} .field{display:flex;flex-direction:column;gap:4px} label{font-size:.79rem;font-weight:750;color:#344054}
+input,select{width:100%;padding:9px;border:1px solid #b8c1cc;border-radius:8px;background:#fff;font:inherit} input:focus,select:focus{outline:2px solid #bfdbfe;border-color:var(--blue)}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:6px} .check{display:flex;gap:7px;align-items:flex-start;border:1px solid #e2e8f0;border-radius:8px;padding:7px} .check input{width:auto;margin-top:3px}
+button{border:0;border-radius:9px;padding:11px 14px;font:inherit;font-weight:800;cursor:pointer;background:var(--teal);color:#fff} button.secondary{background:#64748b}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px} .status{border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:.86rem} .ok{background:var(--greenbg);border:1px solid #86d69b;color:var(--green)} .warn{background:var(--amberbg);border:1px solid #f5cf70;color:var(--amber)} .bad{background:var(--redbg);border:1px solid #ef9a9a;color:var(--red)} .info{background:var(--bluebg);border:1px solid #93c5fd;color:#1e3a8a}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px} .kpi{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff} .kpi span{font-size:.73rem;color:var(--muted);display:block} .kpi b{display:block;font-size:1.25rem;color:var(--navy);margin:2px 0}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:.82rem} th,td{border:1px solid var(--line);padding:7px;text-align:right;vertical-align:top} th:first-child,td:first-child{text-align:left} th{background:#e8f3f2;color:#115e59}
+.scroll{overflow:auto;-webkit-overflow-scrolling:touch} .deficit{background:var(--amberbg);color:var(--amber);font-weight:750} .missing{background:#fff7ed;color:#9a3412;font-weight:700} .hide{display:none}
+.small{font-size:.75rem;color:var(--muted)} details{border:1px solid var(--line);background:#fff;border-radius:10px;margin-top:10px} summary{cursor:pointer;padding:10px 12px;font-weight:800} details .inside{padding:0 12px 12px;font-size:.8rem}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}} @media(max-width:650px){.form,.checks,.kpis{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><h1>MASTER Erişkin Yoğun Bakım Beslenme Karar Destek Sistemi v5.0</h1><p>ASPEN + ESPEN birleşik hedef motoru</p></header>
+<main>
+<div id="runtime" class="status info">Uygulama hazır. Girdileri tamamlayıp <b>Hesapla</b> düğmesine basın.</div>
+<div class="layout">
+<section>
+<div class="card"><div class="card-title">1. Hasta bilgileri</div><div class="body"><div class="form">
+<div class="field"><label>Kilo (kg)</label><input id="weight" type="number" value="70" min="25" max="350" step="0.1"></div>
+<div class="field"><label>Boy (cm)</label><input id="height" type="number" value="170" min="120" max="230"></div>
+<div class="field"><label>Cinsiyet</label><select id="sex"><option value="m">Erkek</option><option value="f">Kadın</option></select></div>
+<div class="field"><label>Kuru/alışılmış ağırlık (kg)</label><input id="dry" type="number" placeholder="Ödem/asit/AKI varsa"></div>
+<div class="field"><label>Klinik faz</label><select id="phase"><option value="early">Erken akut (gün 1–3)</option><option value="stable">Stabilizasyon / post-akut</option></select></div>
+<div class="field"><label>İndirekt kalorimetri (kcal/gün)</label><input id="ic" type="number" placeholder="Varsa"></div>
+<div class="field full"><label>Klinik durum</label><select id="condition"><option value="general">Genel kritik hasta</option>
+<option value="sepsis">Sepsis / septik şok — stabilize</option>
+<option value="shock">Hemodinamik instabil şok</option>
+<option value="aki">AKI/AKD — KRT yok</option>
+<option value="ikrt">İntermittan KRT / hemodiyaliz</option>
+<option value="crrt">CRRT / CKRT / PIKRT</option>
+<option value="trauma">Travma / politravma</option>
+<option value="tbi">Travmatik beyin hasarı</option>
+<option value="burn">Geniş yanık</option>
+<option value="openabd">Açık abdomen / yüksek Gİ kayıp</option>
+<option value="liver">Karaciğer yetmezliği / asit</option>
+<option value="refeed">Yeniden beslenme riski</option>
+<option value="refeedx">Çok yüksek yeniden beslenme riski</option></select></div>
+<div class="field"><label>Propofol (mL/saat)</label><input id="propofol" type="number" value="0" step="0.1"></div>
+<div class="field"><label>Diğer non-nütrisyonel enerji (kcal/gün)</label><input id="otherKcal" type="number" value="0"></div>
+<div class="field"><label>Açık abdomen/Gİ kayıp (L/gün)</label><input id="lossL" type="number" value="0" step="0.1"></div>
+<div class="field"><label>Hedef düzeyi</label><select id="level"><option value="low">Alt</option><option value="mid" selected>Orta</option><option value="high">Üst</option></select></div>
+</div></div></div>
+
+<div class="card"><div class="card-title">2. Beslenme yolu seçimi</div><div class="body"><div class="form">
+<div class="field"><label>Oral alım yeterli mi?</label><select id="oral"><option value="no">Hayır</option><option value="yes">Evet</option></select></div>
+<div class="field"><label>MAP (mmHg)</label><input id="map" type="number" value="70"></div>
+<div class="field"><label>Vazopressör</label><select id="pressor"><option value="none">Yok</option><option value="stable">Var, stabil/azalıyor</option><option value="rising">Var, artıyor</option></select></div>
+<div class="field"><label>GİS kullanılabilir mi?</label><select id="gi"><option value="yes">Evet</option><option value="no">Hayır / güvenli değil</option></select></div>
+<div class="field full"><div class="checks">
+<div class="check"><input id="ischemia" type="checkbox"><label for="ischemia">Bağırsak iskemi şüphesi</label></div>
+<div class="check"><input id="obstruction" type="checkbox"><label for="obstruction">Mekanik obstrüksiyon</label></div>
+<div class="check"><input id="acs" type="checkbox"><label for="acs">Abdominal kompartman</label></div>
+<div class="check"><input id="bleed" type="checkbox"><label for="bleed">Kontrolsüz Gİ kanama</label></div>
+<div class="check"><input id="fistula" type="checkbox"><label for="fistula">Distal erişimsiz yüksek debili fistül</label></div>
+<div class="check"><input id="intolerance" type="checkbox"><label for="intolerance">Ağır EN intoleransı</label></div>
+</div></div>
+<div class="field"><label>Nütrisyon riski</label><select id="risk"><option value="low">Düşük / iyi beslenmiş</option><option value="high">Yüksek</option><option value="mal">Orta-ağır malnütrisyon</option></select></div>
+<div class="field"><label>Yetersiz alım süresi (gün)</label><input id="days" type="number" value="1" min="0"></div>
+<div class="field"><label>EN ile hedef karşılanma (%)</label><input id="enPct" type="number" value="0" min="0" max="100"></div>
+<div class="field"><label>Gastrik rezidü (mL/6 saat)</label><input id="grv" type="number" placeholder="Varsa"></div>
+</div><div id="routeDecision" class="status ok" style="margin-top:10px">—</div></div></div>
+
+<div class="card"><div class="card-title">3. Ürün ve uygulama</div><div class="body"><div class="form">
+<div class="field"><label>Uygulanacak yol</label><select id="route"><option value="enteral">Enteral</option><option value="parenteral">Parenteral (3 odacıklı)</option></select></div>
+<div class="field"><label>Su/elektrolit hedefi</label><select id="emode"><option value="auto">Otomatik başlangıç hedefi</option><option value="manual">Manuel</option></select></div>
+<div id="enBox" class="field full"><label>Enteral ürün</label><select id="enProduct"><option value="EN1">Abbott — Ensure (250 mL)</option>
+<option value="EN2">Abbott — Ensure 2 Cal (200 mL)</option>
+<option value="EN3">Abbott — Ensure Compact (125 mL)</option>
+<option value="EN4">Abbott — Ensure Plus (220 mL)</option>
+<option value="EN5">Abbott — Ensure Plus Fiber (220 mL)</option>
+<option value="EN6">Abbott — Glucerna Select (220 mL)</option>
+<option value="EN7">Abbott — Glucerna SR (220 mL)</option>
+<option value="EN8">Abbott — Jevity (500 mL)</option>
+<option value="EN9">Abbott — Jevity Plus (500 mL)</option>
+<option value="EN10">Abbott — Nepro HP (220 mL)</option>
+<option value="EN11">Abbott — Osmolite (500 mL)</option>
+<option value="EN12">Abbott — Oxepa (500 mL)</option>
+<option value="EN13">Abbott — Pulmocare (237 mL)</option>
+<option value="EN14">Nestlé — Impact Enteral (500 mL)</option>
+<option value="EN15">Nestlé — Impact Glutamine (500 mL)</option>
+<option value="EN16">Nestlé — Impact Oral (hazırlanmış)</option>
+<option value="EN17">Nestlé — Impact RTD (237 mL)</option>
+<option value="EN18">Nestlé — Isosource Energy (500 mL)</option>
+<option value="EN19">Nestlé — Isosource Protein (500 mL)</option>
+<option value="EN20">Nestlé — Isosource Standard (500 mL)</option>
+<option value="EN21">Nestlé — Isosource Standard Fibre (500 mL)</option>
+<option value="EN22">Nestlé — Modulen IBD</option>
+<option value="EN23">Nestlé — Novasource Diabet (250 mL)</option>
+<option value="EN24">Nestlé — Novasource GI Control (500 mL)</option>
+<option value="EN25">Nestlé — Resource 2.0 (200 mL)</option>
+<option value="EN26">Nestlé — Resource 2.0 Fibre (190 mL)</option>
+<option value="EN27">Nestlé — Resource Diabet (200 mL)</option>
+<option value="EN28">Nestlé — Resource Energy (200 mL)</option>
+<option value="EN29">Nestlé — Resource Protein (200 mL)</option>
+<option value="EN30">Nutricia — Cubitan (200 mL)</option>
+<option value="EN31">Nutricia — Diasip (200 mL)</option>
+<option value="EN32">Nutricia — Fortimel Compact Fibre (125 mL)</option>
+<option value="EN33">Nutricia — Fortimel Compact Protein (125 mL)</option>
+<option value="EN34">Nutricia — Fortimel Drink (500 mL)</option>
+<option value="EN35">Nutricia — Fortimel Energy (200 mL)</option>
+<option value="EN36">Nutricia — Fortimel Energy Multi Fibre (200 mL)</option>
+<option value="EN37">Nutricia — Nutrison (500 mL)</option>
+<option value="EN38">Nutricia — Nutrison Advanced Cubison (500 mL)</option>
+<option value="EN39">Nutricia — Nutrison Advanced Diason (500 mL)</option>
+<option value="EN40">Nutricia — Nutrison Advanced Diason Low Energy (500 mL)</option>
+<option value="EN41">Nutricia — Nutrison Advanced Peptisorb (500 mL)</option>
+<option value="EN42">Nutricia — Nutrison Energy (500 mL)</option>
+<option value="EN43">Nutricia — Nutrison Multi Fibre (500 mL)</option>
+<option value="EN44">Nutricia — Nutrison Protein Plus (500 mL)</option>
+<option value="EN45">Nutricia — Nutrison Protein Plus Multi Fibre (500 mL)</option>
+<option value="EN46">Nutricia — Nutrivigor (200 mL)</option></select></div>
+<div id="pnBox" class="field full hide"><label>Parenteral ürün</label><select id="pnProduct"><option value="PN1">B. Braun — Nutriflex Lipid Peri 1250 mL (Periferik)</option>
+<option value="PN2">B. Braun — Nutriflex Lipid Peri 1875 mL (Periferik)</option>
+<option value="PN3">B. Braun — Nutriflex Lipid Peri 2500 mL (Periferik)</option>
+<option value="PN4">B. Braun — Nutriflex Lipid Plus 1000 mL (Santral)</option>
+<option value="PN5">B. Braun — Nutriflex Lipid Plus 1250 mL (Santral)</option>
+<option value="PN6">B. Braun — Nutriflex Lipid Plus 1875 mL (Santral)</option>
+<option value="PN7">B. Braun — Nutriflex Lipid Plus 2500 mL (Santral)</option>
+<option value="PN8">Baxter — Olimel N7-960E 1000 mL (Santral)</option>
+<option value="PN9">Baxter — Olimel N7-960E 1500 mL (Santral)</option>
+<option value="PN10">Baxter — Olimel N7-960E 2000 mL (Santral)</option>
+<option value="PN11">Baxter — Olimel N9-840E 1000 mL (Santral)</option>
+<option value="PN12">Baxter — Olimel N9-840E 1500 mL (Santral)</option>
+<option value="PN13">Baxter — Olimel N9-840E 2000 mL (Santral)</option>
+<option value="PN14">Baxter — PeriOlimel N4-600E 1000 mL (Periferik)</option>
+<option value="PN15">Baxter — PeriOlimel N4-600E 1500 mL (Periferik)</option>
+<option value="PN16">Baxter — PeriOlimel N4-600E 2000 mL (Periferik)</option>
+<option value="PN17">Baxter — PeriOlimel N4-600E 2500 mL (Periferik)</option></select></div>
+<div id="manualBox" class="field full hide"><div class="form">
+<div class="field"><label>Su mL/gün</label><input id="mWater" type="number"></div>
+<div class="field"><label>Na mEq/gün</label><input id="mNa" type="number"></div>
+<div class="field"><label>K mEq/gün</label><input id="mK" type="number"></div>
+<div class="field"><label>Cl mEq/gün</label><input id="mCl" type="number"></div>
+<div class="field"><label>Ca mEq/gün</label><input id="mCa" type="number"></div>
+<div class="field"><label>Mg mEq/gün</label><input id="mMg" type="number"></div>
+<div class="field"><label>Fosfat nominal mEq/gün</label><input id="mPhos" type="number"></div>
+</div></div>
+</div><div class="actions"><button id="calcBtn" type="button">Hesapla</button><button id="printBtn" class="secondary" type="button">Yazdır / PDF</button></div></div></div>
+</section>
+
+<section>
+<div class="card"><div class="card-title">Birleşik klinik hedef</div><div class="body">
+<div class="kpis">
+<div class="kpi"><span>Enerji hedefi</span><b id="energyTarget">—</b><span>kcal/gün</span></div>
+<div class="kpi"><span>Protein hedefi</span><b id="proteinTarget">—</b><span>g/gün</span></div>
+<div class="kpi"><span>Su hedefi</span><b id="waterTarget">—</b><span>mL/gün</span></div>
+<div class="kpi"><span>Önerilen hız</span><b id="rate">—</b><span>mL/saat</span></div>
+</div>
+<p id="targetBasis" class="small"></p>
+</div></div>
+
+<div class="card"><div class="card-title">24 saatlik ürün sunumu</div><div class="body">
+<div class="scroll"><table><thead><tr><th>Parametre</th><th>Hedef</th><th>Üründen</th><th>Eksik</th><th>Karşılama</th></tr></thead><tbody id="macroRows"></tbody></table></div>
+<div class="kpis" style="margin-top:9px">
+<div class="kpi"><span>24 saatlik hacim</span><b id="volume">—</b><span>mL</span></div>
+<div class="kpi"><span>Enerji : protein</span><b id="ratio">—</b><span>kcal : 1 g protein</span></div>
+<div class="kpi"><span>Protein enerji oranı</span><b id="proteinPct">—</b><span>%</span></div>
+<div class="kpi"><span>Paket/torba</span><b id="packs">—</b><span>adet/gün</span></div>
+</div>
+</div></div>
+
+<div class="card"><div class="card-title">Su ve elektrolitler</div><div class="body">
+<div class="scroll"><table><thead><tr><th>Öğe</th><th>Hedef</th><th>Üründen</th><th>Eksik</th><th>Veri</th></tr></thead><tbody id="electroRows"></tbody></table></div>
+<div id="supplementAdvice" class="status warn" style="margin-top:9px">—</div>
+</div></div>
+
+<div class="card"><div class="card-title">Vitamin ve mikroelement önerisi</div><div class="body" id="microBlock">—</div></div>
+<div class="card"><div class="card-title">Uyarılar</div><div class="body" id="warnings">—</div></div>
+
+<details><summary>Kaynaklar ve sentez yöntemi</summary><div class="inside">
+<p><b>Birleşik hedef:</b> Kullanıcı ASPEN/ESPEN seçmez. Erken akut dönemde aşırı enerji verilmemesi, stabilizasyonla hedefe ilerleme ve proteinin progresif artırılması iki kılavuzun ortak yönlerinden sentezlenmiştir. Özel renal hedefler ESPEN Kidney 2024 ile uyarlanır.</p>
+<ul><li><a href="https://nutritioncare.org/wp-content/uploads/2024/12/Adult-Crit-Ill-Patient-Guidelines-Factsheet.pdf" target="_blank" rel="noopener">ASPEN</a></li><li><a href="https://www.espen.org/files/ESPEN-Guidelines/ESPEN_practical_and_partially_revised_guideline_Clinical_nutrition_in_the_intensive_care_unit.pdf" target="_blank" rel="noopener">ESPEN ICU 2023</a></li><li><a href="https://www.espen.org/files/ESPEN-Guidelines/ESPEN_practical_guideline_on_clinical_nutrition_in_hospitalized_patients_with_acute_or_chronic_kidney_disease-text.pdf" target="_blank" rel="noopener">ESPEN Kidney 2024</a></li><li><a href="https://www.espen.org/files/ESPEN-Guidelines/ESPEN-practical-short-micronutrient-guideline.pdf" target="_blank" rel="noopener">ESPEN Micronutrients 2024</a></li><li><a href="https://www.nice.org.uk/guidance/cg174/chapter/recommendations" target="_blank" rel="noopener">NICE IV fluids</a></li></ul>
+</div></details>
+</section>
+</div>
+</main>
+
+<script>
+var EN={"EN1":{"id":"EN1","manufacturer":"Abbott","product":"Ensure","label":"Abbott — Ensure (250 mL)","form":"oral","packMl":250.0,"kcalPerMl":1.0,"proteinGPerMl":0.03975,"fatGPerMl":0.03344444444444444,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN2":{"id":"EN2","manufacturer":"Abbott","product":"Ensure 2 Cal","label":"Abbott — Ensure 2 Cal (200 mL)","form":"oral","packMl":200.0,"kcalPerMl":2.0,"proteinGPerMl":0.084,"fatGPerMl":0.08911111111111111,"waterMlPerMl":0.7,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN3":{"id":"EN3","manufacturer":"Abbott","product":"Ensure Compact","label":"Abbott — Ensure Compact (125 mL)","form":"oral","packMl":125.0,"kcalPerMl":2.4,"proteinGPerMl":0.10200000000000001,"fatGPerMl":0.09333333333333334,"waterMlPerMl":0.643,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN4":{"id":"EN4","manufacturer":"Abbott","product":"Ensure Plus","label":"Abbott — Ensure Plus (220 mL)","form":"oral","packMl":220.0,"kcalPerMl":1.5,"proteinGPerMl":0.06262499999999999,"fatGPerMl":0.04916666666666667,"waterMlPerMl":0.76,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN5":{"id":"EN5","manufacturer":"Abbott","product":"Ensure Plus Fiber","label":"Abbott — Ensure Plus Fiber (220 mL)","form":"oral","packMl":220.0,"kcalPerMl":1.55,"proteinGPerMl":0.062387500000000005,"fatGPerMl":0.049255555555555566,"waterMlPerMl":0.76,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN6":{"id":"EN6","manufacturer":"Abbott","product":"Glucerna Select","label":"Abbott — Glucerna Select (220 mL)","form":"oral/tüp","packMl":220.0,"kcalPerMl":1.0,"proteinGPerMl":0.05,"fatGPerMl":0.05444444444444445,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN7":{"id":"EN7","manufacturer":"Abbott","product":"Glucerna SR","label":"Abbott — Glucerna SR (220 mL)","form":"oral","packMl":220.0,"kcalPerMl":0.9,"proteinGPerMl":0.0414,"fatGPerMl":0.0338,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN8":{"id":"EN8","manufacturer":"Abbott","product":"Jevity","label":"Abbott — Jevity (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.0,"proteinGPerMl":0.0375,"fatGPerMl":0.03244444444444444,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN9":{"id":"EN9","manufacturer":"Abbott","product":"Jevity Plus","label":"Abbott — Jevity Plus (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.2,"proteinGPerMl":0.0546,"fatGPerMl":0.038533333333333336,"waterMlPerMl":0.82,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN10":{"id":"EN10","manufacturer":"Abbott","product":"Nepro HP","label":"Abbott — Nepro HP (220 mL)","form":"oral/tüp","packMl":220.0,"kcalPerMl":1.8,"proteinGPerMl":0.081,"fatGPerMl":0.09759999999999999,"waterMlPerMl":0.7,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN11":{"id":"EN11","manufacturer":"Abbott","product":"Osmolite","label":"Abbott — Osmolite (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.01,"proteinGPerMl":0.04,"fatGPerMl":0.034,"waterMlPerMl":0.8490000000000001,"waterType":"Ürüne özgü","electrolytes":{"na":0.03827784495732891,"k":0.03785330820010077,"cl":0.03836064648971878,"ca":0.0339338290333849,"mg":0.016457519029006377,"phos":0.04390807714907438},"electrolyteStatus":"Tam","source":"https://avesis.deu.edu.tr/dosya?id=f60b2cd2-4419-4058-bd1d-55b7590e0a63","note":"2008 tarihli Türkçe tez içindeki prospektüs tablosu; güncel ambalajla doğrulanmalıdır."},"EN12":{"id":"EN12","manufacturer":"Abbott","product":"Oxepa","label":"Abbott — Oxepa (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.5,"proteinGPerMl":0.0625,"fatGPerMl":0.09369999999999999,"waterMlPerMl":0.76,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.056981791925114614,"k":0.04987429120959223,"cl":0.04766874453501819,"ca":0.04191825939418134,"mg":0.010697387368854146,"phos":0.05423938941944482},"electrolyteStatus":"Tam","source":"https://diyet.fit/oxepa-abbott/","note":"Kaynak sayfa, üretici datasheet'ini aktarmaktadır."},"EN13":{"id":"EN13","manufacturer":"Abbott","product":"Pulmocare","label":"Abbott — Pulmocare (237 mL)","form":"oral/tüp","packMl":237.0,"kcalPerMl":1.5,"proteinGPerMl":0.061875,"fatGPerMl":0.09250000000000001,"waterMlPerMl":0.76,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN14":{"id":"EN14","manufacturer":"Nestlé","product":"Impact Enteral","label":"Nestlé — Impact Enteral (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.01,"proteinGPerMl":0.055999999999999994,"fatGPerMl":0.027999999999999997,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.04654237966402491,"k":0.034272589856847994,"cl":0.03384762925563422,"ca":0.03992215180398223,"mg":0.018926146883357333,"phos":0.04649090521666698},"electrolyteStatus":"Tam","source":"https://www.nestlehealthscience.com.tr/markalar/impact/impact-enteral","note":""},"EN15":{"id":"EN15","manufacturer":"Nestlé","product":"Impact Glutamine","label":"Nestlé — Impact Glutamine (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.13,"proteinGPerMl":0.063,"fatGPerMl":0.03,"waterMlPerMl":0.82,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.04654237966402491,"k":0.038364839391994025,"cl":0.03384762925563422,"ca":0.03992215180398223,"mg":0.018926146883357333,"phos":0.04649090521666698},"electrolyteStatus":"Tam","source":"https://www.nestlehealthscience.com.tr/markalar/impact/impact-glutamin","note":""},"EN16":{"id":"EN16","manufacturer":"Nestlé","product":"Impact Oral (hazırlanmış)","label":"Nestlé — Impact Oral (hazırlanmış)","form":"toz/hazırlanmış","packMl":null,"kcalPerMl":1.23,"proteinGPerMl":0.07072500000000001,"fatGPerMl":0.028699999999999996,"waterMlPerMl":0.82,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN17":{"id":"EN17","manufacturer":"Nestlé","product":"Impact RTD","label":"Nestlé — Impact RTD (237 mL)","form":"oral","packMl":237.0,"kcalPerMl":1.44,"proteinGPerMl":0.0756,"fatGPerMl":0.038400000000000004,"waterMlPerMl":0.76,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN18":{"id":"EN18","manufacturer":"Nestlé","product":"Isosource Energy","label":"Nestlé — Isosource Energy (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.57,"proteinGPerMl":0.06280000000000001,"fatGPerMl":0.06105555555555555,"waterMlPerMl":0.76,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN19":{"id":"EN19","manufacturer":"Nestlé","product":"Isosource Protein","label":"Nestlé — Isosource Protein (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.3,"proteinGPerMl":0.067,"fatGPerMl":0.044000000000000004,"waterMlPerMl":0.82,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.03914779597908638,"k":0.038364839391994025,"cl":0.01974445039911996,"ca":0.04990268975497779,"mg":0.011520263320304465,"phos":0.048428026267361445},"electrolyteStatus":"Tam","source":"https://www.nestlehealthscience.com.tr/markalar/isosource/isosource-protein","note":""},"EN20":{"id":"EN20","manufacturer":"Nestlé","product":"Isosource Standard","label":"Nestlé — Isosource Standard (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.0,"proteinGPerMl":0.04,"fatGPerMl":0.034444444444444444,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN21":{"id":"EN21","manufacturer":"Nestlé","product":"Isosource Standard Fibre","label":"Nestlé — Isosource Standard Fibre (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.03,"proteinGPerMl":0.038625,"fatGPerMl":0.034333333333333334,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN22":{"id":"EN22","manufacturer":"Nestlé","product":"Modulen IBD","label":"Nestlé — Modulen IBD","form":"toz/hazırlanmış","packMl":null,"kcalPerMl":1.0,"proteinGPerMl":0.035,"fatGPerMl":0.04666666666666667,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN23":{"id":"EN23","manufacturer":"Nestlé","product":"Novasource Diabet","label":"Nestlé — Novasource Diabet (250 mL)","form":"oral/tüp","packMl":250.0,"kcalPerMl":1.07,"proteinGPerMl":0.048,"fatGPerMl":0.046,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.03349311433766279,"k":0.0419455577352468,"cl":0.02736016698163766,"ca":0.04990268975497779,"mg":0.013166015223205103,"phos":0.04197095609837992},"electrolyteStatus":"Tam","source":"https://diyet.fit/novasource-diabet-nestle/","note":""},"EN24":{"id":"EN24","manufacturer":"Nestlé","product":"Novasource GI Control","label":"Nestlé — Novasource GI Control (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.1,"proteinGPerMl":0.04125,"fatGPerMl":0.035444444444444445,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN25":{"id":"EN25","manufacturer":"Nestlé","product":"Resource 2.0","label":"Nestlé — Resource 2.0 (200 mL)","form":"oral/tüp","packMl":200.0,"kcalPerMl":2.0,"proteinGPerMl":0.09,"fatGPerMl":0.085,"waterMlPerMl":0.7,"waterType":"Ürüne özgü","electrolytes":{"na":0.04349755108787376,"k":0.05371077514879163,"cl":0.031026993484331366,"ca":0.08732970707121114,"mg":0.016457519029006377,"phos":0.07748484202777832},"electrolyteStatus":"Tam","source":"https://www.nestlehealthscience.com.tr/markalar/resource/resource-2-0","note":"Su, 2 kcal/mL ürün sınıfı için kılavuz tahmini."},"EN26":{"id":"EN26","manufacturer":"Nestlé","product":"Resource 2.0 Fibre","label":"Nestlé — Resource 2.0 Fibre (190 mL)","form":"oral/tüp","packMl":190.0,"kcalPerMl":2.0,"proteinGPerMl":0.09,"fatGPerMl":0.087,"waterMlPerMl":0.69,"waterType":"Ürüne özgü","electrolytes":{"na":0.04349755108787376,"k":0.05371077514879163,"cl":0.031026993484331366,"ca":0.0948151105344578,"mg":0.016457519029006377,"phos":0.08394191219675984},"electrolyteStatus":"Tam","source":"https://www.nestlehealthscience.com.tr/markalar/resource/resource-2-0-fibre","note":"Tam ürün etiketi; su 69 g/100 mL ayrı ürün veri sayfasından."},"EN27":{"id":"EN27","manufacturer":"Nestlé","product":"Resource Diabet","label":"Nestlé — Resource Diabet (200 mL)","form":"oral","packMl":200.0,"kcalPerMl":1.0,"proteinGPerMl":0.07,"fatGPerMl":0.04777777777777778,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN28":{"id":"EN28","manufacturer":"Nestlé","product":"Resource Energy","label":"Nestlé — Resource Energy (200 mL)","form":"oral","packMl":200.0,"kcalPerMl":1.5,"proteinGPerMl":0.055,"fatGPerMl":0.049,"waterMlPerMl":0.76,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.034798040870299,"k":0.04348015131092656,"cl":0.052181761769102754,"ca":0.03992215180398223,"mg":0.02304052664060893,"phos":0.051656561351852204},"electrolyteStatus":"Tam","source":"https://www.nestlehealthscience.com.tr/markalar/resource/resource-energy","note":"Çikolata aromasında Na/Cl farklı olabilir."},"EN29":{"id":"EN29","manufacturer":"Nestlé","product":"Resource Protein","label":"Nestlé — Resource Protein (200 mL)","form":"oral","packMl":200.0,"kcalPerMl":1.25,"proteinGPerMl":0.094,"fatGPerMl":0.035,"waterMlPerMl":0.82,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.034798040870299,"k":0.039643667371727156,"cl":0.028206357713028516,"ca":0.059883227705973346,"mg":0.018926146883357333,"phos":0.06457070168981527},"electrolyteStatus":"Tam","source":"https://www.nestlehealthscience.com.tr/markalar/resource/resource-protein","note":"Çikolata aromasında K ve Cl farklı olabilir; standart aroma değerleri."},"EN30":{"id":"EN30","manufacturer":"Nutricia","product":"Cubitan","label":"Nutricia — Cubitan (200 mL)","form":"oral","packMl":200.0,"kcalPerMl":1.28,"proteinGPerMl":0.0992,"fatGPerMl":0.035555555555555556,"waterMlPerMl":0.82,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN31":{"id":"EN31","manufacturer":"Nutricia","product":"Diasip","label":"Nutricia — Diasip (200 mL)","form":"oral","packMl":200.0,"kcalPerMl":1.04,"proteinGPerMl":0.049400000000000006,"fatGPerMl":0.03813333333333333,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN32":{"id":"EN32","manufacturer":"Nutricia","product":"Fortimel Compact Fibre","label":"Nutricia — Fortimel Compact Fibre (125 mL)","form":"oral","packMl":125.0,"kcalPerMl":2.4,"proteinGPerMl":0.09519999999999999,"fatGPerMl":0.10400000000000001,"waterMlPerMl":0.643,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.03610296740293521,"k":0.05857032147177755,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Kısmi","source":"https://diyet.fit/fortimel-compact-fibre/","note":"Yağ yüzdesinden hesaplanmıştır; Türkçe sayfada yalnız Na ve K yayımlanmış."},"EN33":{"id":"EN33","manufacturer":"Nutricia","product":"Fortimel Compact Protein","label":"Nutricia — Fortimel Compact Protein (125 mL)","form":"oral","packMl":125.0,"kcalPerMl":2.4,"proteinGPerMl":0.144,"fatGPerMl":0.09333333333333334,"waterMlPerMl":0.643,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN34":{"id":"EN34","manufacturer":"Nutricia","product":"Fortimel Drink","label":"Nutricia — Fortimel Drink (500 mL)","form":"oral","packMl":500.0,"kcalPerMl":1.0,"proteinGPerMl":0.039,"fatGPerMl":0.039,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.04349755108787376,"k":0.038364839391994025,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Kısmi","source":"https://diyet.fit/fortimel-drink-nutricia/","note":"Kaynak hacmi 500 mL olarak verir; farklı ambalajlar bulunabilir."},"EN35":{"id":"EN35","manufacturer":"Nutricia","product":"Fortimel Energy","label":"Nutricia — Fortimel Energy (200 mL)","form":"oral","packMl":200.0,"kcalPerMl":1.5,"proteinGPerMl":0.06,"fatGPerMl":0.05833333333333333,"waterMlPerMl":0.76,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN36":{"id":"EN36","manufacturer":"Nutricia","product":"Fortimel Energy Multi Fibre","label":"Nutricia — Fortimel Energy Multi Fibre (200 mL)","form":"oral","packMl":200.0,"kcalPerMl":1.54,"proteinGPerMl":0.06,"fatGPerMl":0.057999999999999996,"waterMlPerMl":0.76,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.03871282046820764,"k":0.040666729755513664,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Kısmi","source":"https://diyet.fit/fortimel-energy-multi-fibre-nutricia/","note":"Türkçe sayfada yalnız Na ve K yayımlanmış."},"EN37":{"id":"EN37","manufacturer":"Nutricia","product":"Nutrison","label":"Nutricia — Nutrison (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.0,"proteinGPerMl":0.04,"fatGPerMl":0.03888888888888889,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN38":{"id":"EN38","manufacturer":"Nutricia","product":"Nutrison Advanced Cubison","label":"Nutricia — Nutrison Advanced Cubison (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.04,"proteinGPerMl":0.055,"fatGPerMl":0.033,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.04349755108787376,"k":0.038364839391994025,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Kısmi","source":"https://diyet.fit/nutrison-advanced-cubison/","note":"Türkçe sayfada yalnız Na ve K yayımlanmış."},"EN39":{"id":"EN39","manufacturer":"Nutricia","product":"Nutrison Advanced Diason","label":"Nutricia — Nutrison Advanced Diason (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.03,"proteinGPerMl":0.043775,"fatGPerMl":0.04234444444444445,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN40":{"id":"EN40","manufacturer":"Nutricia","product":"Nutrison Advanced Diason Low Energy","label":"Nutricia — Nutrison Advanced Diason Low Energy (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":0.78,"proteinGPerMl":0.031200000000000002,"fatGPerMl":0.03206666666666667,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN41":{"id":"EN41","manufacturer":"Nutricia","product":"Nutrison Advanced Peptisorb","label":"Nutricia — Nutrison Advanced Peptisorb (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.0,"proteinGPerMl":0.04,"fatGPerMl":0.017,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.04349755108787376,"k":0.038364839391994025,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Kısmi","source":"https://diyet.fit/nutrison-advanced-peptisorb/","note":"Türkçe sayfada yalnız Na ve K yayımlanmış."},"EN42":{"id":"EN42","manufacturer":"Nutricia","product":"Nutrison Energy","label":"Nutricia — Nutrison Energy (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.5,"proteinGPerMl":0.06,"fatGPerMl":0.057999999999999996,"waterMlPerMl":0.76,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.058286718457750825,"k":0.051408884785271995,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Kısmi","source":"https://diyet.fit/nutrison-energy/","note":"Türkçe sayfada yalnız Na ve K yayımlanmış."},"EN43":{"id":"EN43","manufacturer":"Nutricia","product":"Nutrison Multi Fibre","label":"Nutricia — Nutrison Multi Fibre (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.03,"proteinGPerMl":0.04,"fatGPerMl":0.039,"waterMlPerMl":0.84,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":0.04349755108787376,"k":0.038364839391994025,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Kısmi","source":"https://diyet.fit/nutrison-multi-fibre/","note":"Türkçe sayfada yalnız Na ve K yayımlanmış."},"EN44":{"id":"EN44","manufacturer":"Nutricia","product":"Nutrison Protein Plus","label":"Nutricia — Nutrison Protein Plus (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.25,"proteinGPerMl":0.0625,"fatGPerMl":0.048611111111111105,"waterMlPerMl":0.82,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN45":{"id":"EN45","manufacturer":"Nutricia","product":"Nutrison Protein Plus Multi Fibre","label":"Nutricia — Nutrison Protein Plus Multi Fibre (500 mL)","form":"tüp","packMl":500.0,"kcalPerMl":1.28,"proteinGPerMl":0.064,"fatGPerMl":0.048355555555555554,"waterMlPerMl":0.82,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."},"EN46":{"id":"EN46","manufacturer":"Nutricia","product":"Nutrivigor","label":"Nutricia — Nutrivigor (200 mL)","form":"oral","packMl":200.0,"kcalPerMl":1.5,"proteinGPerMl":0.09112499999999998,"fatGPerMl":0.04800000000000001,"waterMlPerMl":0.76,"waterType":"Enerji yoğunluğuna göre tahmin","electrolytes":{"na":null,"k":null,"cl":null,"ca":null,"mg":null,"phos":null},"electrolyteStatus":"Bulunamadı","source":"https://turkcocukgastro.org/doc/rehber/enteral_beslenme.pdf?v=1","note":"Makro değerler enerji yüzdesinden hesaplanır. Kamuya açık Türkçe tam elektrolit tablosu bulunamadı."}};
+var PN={"PN1":{"id":"PN1","manufacturer":"B. Braun","product":"Nutriflex Lipid Peri","label":"B. Braun — Nutriflex Lipid Peri 1250 mL (Periferik)","route":"Periferik","bagMl":1250.0,"kcalPerMl":0.764,"proteinGPerMl":0.032,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.04,"k":0.024,"cl":0.0384,"ca":0.0048,"mg":0.0048,"phos":0.012},"source":"https://pdf.ilacprospektusu.com/4811-nutriflex-lipid-peri-iv-infuzyon-icin-cozelti-kub.pdf","note":""},"PN2":{"id":"PN2","manufacturer":"B. Braun","product":"Nutriflex Lipid Peri","label":"B. Braun — Nutriflex Lipid Peri 1875 mL (Periferik)","route":"Periferik","bagMl":1875.0,"kcalPerMl":0.7653333333333333,"proteinGPerMl":0.032,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.04,"k":0.024,"cl":0.0384,"ca":0.0048,"mg":0.0048,"phos":0.012},"source":"https://pdf.ilacprospektusu.com/4811-nutriflex-lipid-peri-iv-infuzyon-icin-cozelti-kub.pdf","note":""},"PN3":{"id":"PN3","manufacturer":"B. Braun","product":"Nutriflex Lipid Peri","label":"B. Braun — Nutriflex Lipid Peri 2500 mL (Periferik)","route":"Periferik","bagMl":2500.0,"kcalPerMl":0.764,"proteinGPerMl":0.032,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.04,"k":0.024,"cl":0.0384,"ca":0.0048,"mg":0.0048,"phos":0.012},"source":"https://pdf.ilacprospektusu.com/4811-nutriflex-lipid-peri-iv-infuzyon-icin-cozelti-kub.pdf","note":""},"PN4":{"id":"PN4","manufacturer":"B. Braun","product":"Nutriflex Lipid Plus","label":"B. Braun — Nutriflex Lipid Plus 1000 mL (Santral)","route":"Santral","bagMl":1000.0,"kcalPerMl":1.01,"proteinGPerMl":0.038,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.04,"k":0.028,"cl":0.036,"ca":0.0064,"mg":0.0064,"phos":0.024},"source":"https://cdn.ilacrehberi.com/nutriflex-lipid-plus-infuzyonluk-emulsiyon-c66f-kub.pdf","note":"1000 mL KÜB formülüdür; her ambalajın fiilî piyasada bulunabilirliği ayrıca kontrol edilmelidir."},"PN5":{"id":"PN5","manufacturer":"B. Braun","product":"Nutriflex Lipid Plus","label":"B. Braun — Nutriflex Lipid Plus 1250 mL (Santral)","route":"Santral","bagMl":1250.0,"kcalPerMl":1.012,"proteinGPerMl":0.0384,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.04,"k":0.028,"cl":0.036,"ca":0.0064,"mg":0.0064,"phos":0.024},"source":"https://cdn.ilacrehberi.com/nutriflex-lipid-plus-infuzyonluk-emulsiyon-c66f-kub.pdf","note":"1000 mL KÜB formülüdür; her ambalajın fiilî piyasada bulunabilirliği ayrıca kontrol edilmelidir."},"PN6":{"id":"PN6","manufacturer":"B. Braun","product":"Nutriflex Lipid Plus","label":"B. Braun — Nutriflex Lipid Plus 1875 mL (Santral)","route":"Santral","bagMl":1875.0,"kcalPerMl":1.0133333333333334,"proteinGPerMl":0.0384,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.04,"k":0.028,"cl":0.036,"ca":0.0064,"mg":0.0064,"phos":0.024},"source":"https://cdn.ilacrehberi.com/nutriflex-lipid-plus-infuzyonluk-emulsiyon-c66f-kub.pdf","note":"1000 mL KÜB formülüdür; her ambalajın fiilî piyasada bulunabilirliği ayrıca kontrol edilmelidir."},"PN7":{"id":"PN7","manufacturer":"B. Braun","product":"Nutriflex Lipid Plus","label":"B. Braun — Nutriflex Lipid Plus 2500 mL (Santral)","route":"Santral","bagMl":2500.0,"kcalPerMl":1.012,"proteinGPerMl":0.0384,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.04,"k":0.028,"cl":0.036,"ca":0.0064,"mg":0.0064,"phos":0.024},"source":"https://cdn.ilacrehberi.com/nutriflex-lipid-plus-infuzyonluk-emulsiyon-c66f-kub.pdf","note":"1000 mL KÜB formülüdür; her ambalajın fiilî piyasada bulunabilirliği ayrıca kontrol edilmelidir."},"PN8":{"id":"PN8","manufacturer":"Baxter","product":"Olimel N7-960E","label":"Baxter — Olimel N7-960E 1000 mL (Santral)","route":"Santral","bagMl":1000.0,"kcalPerMl":1.14,"proteinGPerMl":0.0444,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.035,"k":0.03,"cl":0.045,"ca":0.007,"mg":0.008,"phos":0.03},"source":"https://cdn.ilacrehberi.com/olimel-n7960e-infuzyon-icin-elektrolitli-amino-as-f644-kub.pdf","note":"Enerji 1,14 kcal/mL olarak KÜB günlük doz verilerinden ve bileşenlerden hesaplandı."},"PN9":{"id":"PN9","manufacturer":"Baxter","product":"Olimel N7-960E","label":"Baxter — Olimel N7-960E 1500 mL (Santral)","route":"Santral","bagMl":1500.0,"kcalPerMl":1.14,"proteinGPerMl":0.044399999999999995,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.035,"k":0.03,"cl":0.045,"ca":0.007,"mg":0.008,"phos":0.03},"source":"https://cdn.ilacrehberi.com/olimel-n7960e-infuzyon-icin-elektrolitli-amino-as-f644-kub.pdf","note":"Enerji 1,14 kcal/mL olarak KÜB günlük doz verilerinden ve bileşenlerden hesaplandı."},"PN10":{"id":"PN10","manufacturer":"Baxter","product":"Olimel N7-960E","label":"Baxter — Olimel N7-960E 2000 mL (Santral)","route":"Santral","bagMl":2000.0,"kcalPerMl":1.14,"proteinGPerMl":0.0444,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.035,"k":0.03,"cl":0.045,"ca":0.007,"mg":0.008,"phos":0.03},"source":"https://cdn.ilacrehberi.com/olimel-n7960e-infuzyon-icin-elektrolitli-amino-as-f644-kub.pdf","note":"Enerji 1,14 kcal/mL olarak KÜB günlük doz verilerinden ve bileşenlerden hesaplandı."},"PN11":{"id":"PN11","manufacturer":"Baxter","product":"Olimel N9-840E","label":"Baxter — Olimel N9-840E 1000 mL (Santral)","route":"Santral","bagMl":1000.0,"kcalPerMl":1.07,"proteinGPerMl":0.0569,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.035,"k":0.03,"cl":0.045,"ca":0.007,"mg":0.008,"phos":0.03},"source":"https://cdn.ilacrehberi.com/olimel-n9840e-infuzyon-icin-elektrolitli-amino-as-f646-kub.pdf","note":""},"PN12":{"id":"PN12","manufacturer":"Baxter","product":"Olimel N9-840E","label":"Baxter — Olimel N9-840E 1500 mL (Santral)","route":"Santral","bagMl":1500.0,"kcalPerMl":1.0666666666666667,"proteinGPerMl":0.056933333333333336,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.035,"k":0.03,"cl":0.04533333333333334,"ca":0.007066666666666666,"mg":0.008,"phos":0.03},"source":"https://cdn.ilacrehberi.com/olimel-n9840e-infuzyon-icin-elektrolitli-amino-as-f646-kub.pdf","note":""},"PN13":{"id":"PN13","manufacturer":"Baxter","product":"Olimel N9-840E","label":"Baxter — Olimel N9-840E 2000 mL (Santral)","route":"Santral","bagMl":2000.0,"kcalPerMl":1.07,"proteinGPerMl":0.05695,"fatGPerMl":0.04,"waterMlPerMl":1.0,"electrolytes":{"na":0.035,"k":0.03,"cl":0.045,"ca":0.007,"mg":0.008,"phos":0.03},"source":"https://cdn.ilacrehberi.com/olimel-n9840e-infuzyon-icin-elektrolitli-amino-as-f646-kub.pdf","note":""},"PN14":{"id":"PN14","manufacturer":"Baxter","product":"PeriOlimel N4-600E","label":"Baxter — PeriOlimel N4-600E 1000 mL (Periferik)","route":"Periferik","bagMl":1000.0,"kcalPerMl":0.7,"proteinGPerMl":0.0253,"fatGPerMl":0.03,"waterMlPerMl":1.0,"electrolytes":{"na":0.021,"k":0.016,"cl":0.024,"ca":0.004,"mg":0.0044,"phos":0.017},"source":"https://pdf.ilacprospektusu.com/24233-periolimel-n4-600e-infuzyonluk-elektrolitli-amino-asit-cozeltisi-glukoz-cozeltisi-ve-lipid-emulsiyonu-kub.pdf","note":""},"PN15":{"id":"PN15","manufacturer":"Baxter","product":"PeriOlimel N4-600E","label":"Baxter — PeriOlimel N4-600E 1500 mL (Periferik)","route":"Periferik","bagMl":1500.0,"kcalPerMl":0.7,"proteinGPerMl":0.025333333333333333,"fatGPerMl":0.03,"waterMlPerMl":1.0,"electrolytes":{"na":0.021,"k":0.016,"cl":0.024666666666666667,"ca":0.004,"mg":0.004399999999999999,"phos":0.01693333333333333},"source":"https://pdf.ilacprospektusu.com/24233-periolimel-n4-600e-infuzyonluk-elektrolitli-amino-asit-cozeltisi-glukoz-cozeltisi-ve-lipid-emulsiyonu-kub.pdf","note":""},"PN16":{"id":"PN16","manufacturer":"Baxter","product":"PeriOlimel N4-600E","label":"Baxter — PeriOlimel N4-600E 2000 mL (Periferik)","route":"Periferik","bagMl":2000.0,"kcalPerMl":0.7,"proteinGPerMl":0.0253,"fatGPerMl":0.03,"waterMlPerMl":1.0,"electrolytes":{"na":0.021,"k":0.016,"cl":0.0245,"ca":0.004,"mg":0.0044,"phos":0.017},"source":"https://pdf.ilacprospektusu.com/24233-periolimel-n4-600e-infuzyonluk-elektrolitli-amino-asit-cozeltisi-glukoz-cozeltisi-ve-lipid-emulsiyonu-kub.pdf","note":""},"PN17":{"id":"PN17","manufacturer":"Baxter","product":"PeriOlimel N4-600E","label":"Baxter — PeriOlimel N4-600E 2500 mL (Periferik)","route":"Periferik","bagMl":2500.0,"kcalPerMl":0.7,"proteinGPerMl":0.02532,"fatGPerMl":0.03,"waterMlPerMl":1.0,"electrolytes":{"na":0.021,"k":0.016,"cl":0.0244,"ca":0.004,"mg":0.0044,"phos":0.01696},"source":"https://pdf.ilacprospektusu.com/24233-periolimel-n4-600e-infuzyonluk-elektrolitli-amino-asit-cozeltisi-glukoz-cozeltisi-ve-lipid-emulsiyonu-kub.pdf","note":""}};
+function E(id){return document.getElementById(id)}
+function N(id){var x=parseFloat(E(id).value);return isFinite(x)?x:null}
+function C(id){return E(id).checked}
+function F(x,d){return isFinite(x)?x.toLocaleString("tr-TR",{minimumFractionDigits:d||0,maximumFractionDigits:d||0}):"—"}
+function P(a,b){var l=E("level").value;return l==="low"?a:l==="high"?b:(a+b)/2}
+function setStatus(node,kind,html){node.className="status "+kind;node.innerHTML=html}
+
+function weights(){
+ var w=N("weight")||0,h=N("height")||0,sex=E("sex").value,dry=N("dry");
+ var bmi=h?w/Math.pow(h/100,2):0;
+ var ibw=Math.max(25,(sex==="m"?0.9*(h-100):0.9*(h-106)));
+ var adj=ibw+0.25*Math.max(0,w-ibw);
+ return {actual:w,bmi:bmi,ibw:ibw,adj:adj,dry:dry&&dry>0?dry:null,obese:bmi>=30};
+}
+function routeDecision(){
+ if(E("oral").value==="yes")return {kind:"ok",title:"ORAL BESLENME YETERLİ",why:"Oral alım hedefleri karşılıyorsa yapay beslenme rutin olarak gerekmez."};
+ var map=N("map"),pressor=E("pressor").value;
+ if((map!==null&&map<50)||pressor==="rising")return {kind:"bad",title:"BESLENMEYİ İLERLETME",why:"Önce hemodinamik stabilizasyon ve doku perfüzyonu."};
+ var hard=C("ischemia")||C("obstruction")||C("acs")||C("bleed")||C("fistula")||E("gi").value==="no";
+ if(hard){
+   var risk=E("risk").value,days=N("days")||0,when=risk==="mal"?"erken PN":risk==="high"&&days>=3?"PN değerlendir":risk==="low"&&days>=7?"PN değerlendir":"PN zamanlamasını nütrisyon riskine göre değerlendir";
+   return {kind:"warn",title:"PARENTERAL YOLU DEĞERLENDİR",why:"GİS şu anda güvenli/kullanılabilir görünmüyor; "+when+"."};
+ }
+ if(map!==null&&map<60)return {kind:"warn",title:"TROFİK EN / YAKIN İZLEM",why:"MAP 50–59 mmHg; düşük doz ve yakın tolerans izlemi."};
+ if(pressor==="stable")return {kind:"warn",title:"TROFİK EN / YAKIN İZLEM",why:"Vazopressör gereksinimi stabil/azalıyor; düşük doz EN ve yakın izlem."};
+ var grv=N("grv");
+ if((grv!==null&&grv>500)||C("intolerance"))return {kind:"warn",title:"EN İNTOLERANSINI YÖNET",why:"Prokinetik/postpilorik yaklaşım ve nedenin düzeltilmesi değerlendirilmelidir."};
+ var enp=N("enPct")||0,days=N("days")||0,risk=E("risk").value;
+ if(enp<50&&days>=4&&(risk==="high"||risk==="mal"))return {kind:"warn",title:"EN + SUPPLEMENTAL PN DEĞERLENDİR",why:"Persistan enerji/protein açığı ve yüksek nütrisyon riski."};
+ return {kind:"ok",title:"ENTERAL BESLENME ÖNCELİKLİ",why:"GİS kullanılabilir ve belirgin EN kontrendikasyonu yok."};
+}
+function targets(){
+ var W=weights(),c=E("condition").value,phase=E("phase").value;
+ var base=(["aki","ikrt","crrt","liver"].indexOf(c)>=0&&W.dry)?W.dry:W.actual;
+ var ref=W.obese?W.adj:base;
+ var ic=N("ic"),e1,e2,p1,p2;
+ if(ic&&ic>0){e1=(phase==="early"?0.5:0.8)*ic;e2=(phase==="early"?0.7:1.0)*ic}
+ else{e1=(phase==="early"?12:20)*ref;e2=(phase==="early"?20:25)*ref}
+ p1=(phase==="early"?1.0:1.2)*ref;p2=(phase==="early"?1.3:1.5)*ref;
+ if(c==="shock"){e1=e2=p1=p2=0}
+ if(c==="sepsis"&&phase==="early"){e1=Math.min(e1,10*ref);e2=Math.min(e2,15*ref)}
+ if(c==="aki"){p1=1.0*ref;p2=1.3*ref}
+ if(c==="ikrt"){p1=1.3*ref;p2=1.5*ref}
+ if(c==="crrt"){p1=1.5*ref;p2=1.7*ref}
+ if(c==="trauma"){p1=1.3*ref;p2=1.8*ref}
+ if(c==="tbi"){p1=1.3*ref;p2=1.8*ref}
+ if(c==="burn"){p1=1.5*ref;p2=2.0*ref}
+ if(c==="liver"){p1=1.2*ref;p2=1.5*ref}
+ if(c==="openabd"){var l=N("lossL")||0;p1+=15*l;p2+=30*l}
+ if(c==="refeed"){e1=10*ref;e2=20*ref;p1=0.8*ref;p2=1.2*ref}
+ if(c==="refeedx"){e1=5*ref;e2=10*ref;p1=0.8*ref;p2=1.0*ref}
+ var manual=["shock","aki","ikrt","crrt","liver","refeed","refeedx"].indexOf(c)>=0;
+ return {W:W,ref:ref,e1:e1,e2:e2,p1:p1,p2:p2,manual:manual};
+}
+function currentProduct(){return E("route").value==="enteral"?EN[E("enProduct").value]:PN[E("pnProduct").value]}
+function electrolyteTargets(T){
+ var manual=E("emode").value==="manual"||T.manual;
+ if(manual)return {manual:true,water:N("mWater"),na:N("mNa"),k:N("mK"),cl:N("mCl"),ca:N("mCa"),mg:N("mMg"),phos:N("mPhos")};
+ return {manual:false,water:P(25*T.ref,30*T.ref),na:P(1*T.ref,1.5*T.ref),k:P(1*T.ref,1.5*T.ref),cl:P(1*T.ref,1.5*T.ref),ca:P(10,15),mg:P(8,20),phos:P(40,80)};
+}
+function macroRow(n,t,g,u){
+ var d=isFinite(t)&&isFinite(g)?Math.max(0,t-g):null,pc=isFinite(t)&&t>0&&isFinite(g)?100*g/t:null;
+ return "<tr><td>"+n+"</td><td>"+F(t,0)+" "+u+"</td><td>"+F(g,0)+" "+u+"</td><td class='"+(d>0?"deficit":"")+"'>"+F(d,0)+" "+u+"</td><td>"+F(pc,0)+"%</td></tr>";
+}
+function electroRow(n,t,g,u){
+ var d=isFinite(t)&&isFinite(g)?Math.max(0,t-g):null;
+ return "<tr><td>"+n+"</td><td>"+F(t,1)+" "+u+"</td><td class='"+(!isFinite(g)?"missing":"")+"'>"+F(g,1)+" "+u+"</td><td class='"+(d>0?"deficit":"")+"'>"+F(d,1)+" "+u+"</td><td>"+(isFinite(g)?"Mevcut":"Ürün verisi yok")+"</td></tr>";
+}
+function toggle(){
+ var pn=E("route").value==="parenteral";
+ E("pnBox").classList.toggle("hide",!pn);E("enBox").classList.toggle("hide",pn);
+ var manual=E("emode").value==="manual"||targets().manual;E("manualBox").classList.toggle("hide",!manual);
+}
+function calculate(){
+ var R=routeDecision();setStatus(E("routeDecision"),R.kind,"<b>"+R.title+"</b><br>"+R.why);
+ var T=targets(),Pdt=currentProduct(),ET=electrolyteTargets(T),energy=P(T.e1,T.e2),proteinTarget=P(T.p1,T.p2);
+ var non=(N("propofol")||0)*24*1.1+(N("otherKcal")||0),feed=Math.max(0,energy-non);
+ var rate=Pdt&&Pdt.kcalPerMl?feed/Pdt.kcalPerMl/24:0,vol=rate*24;
+ var kcal=vol*(Pdt.kcalPerMl||0),protein=vol*(Pdt.proteinGPerMl||0),water=vol*(Pdt.waterMlPerMl||0);
+ var pkg=Pdt.packMl||Pdt.bagMl,ratio=protein>0?kcal/protein:null,ppct=kcal>0?protein*4/kcal*100:null;
+ E("energyTarget").textContent=F(energy,0);E("proteinTarget").textContent=F(proteinTarget,0);E("waterTarget").textContent=F(ET.water,0);E("rate").textContent=F(rate,1);
+ E("volume").textContent=F(vol,0);E("ratio").textContent=isFinite(ratio)?F(ratio,1)+" : 1":"—";E("proteinPct").textContent=F(ppct,1);E("packs").textContent=F(pkg?vol/pkg:null,2);
+ E("targetBasis").textContent="Birleşik ASPEN–ESPEN hedefi; "+(T.W.obese?"obezitede düzeltilmiş ağırlık kullanıldı. ":"")+(N("ic")?"enerji indirekt kalorimetriye göre faz uyumlu hesaplandı.":"enerji ağırlık-temelli faz uyumlu aralıktan seçildi.");
+ E("macroRows").innerHTML=macroRow("Enerji",energy,kcal+non,"kcal/gün")+macroRow("Protein / amino asit",proteinTarget,protein,"g/gün")+macroRow("Su",ET.water,water,"mL/gün");
+ var given={water:water},ks=["na","k","cl","ca","mg","phos"];ks.forEach(function(k){var x=Pdt.electrolytes?Pdt.electrolytes[k]:null;given[k]=isFinite(x)?x*vol:null});
+ E("electroRows").innerHTML=electroRow("Su",ET.water,given.water,"mL")+electroRow("Sodyum",ET.na,given.na,"mEq")+electroRow("Potasyum",ET.k,given.k,"mEq")+electroRow("Klorür",ET.cl,given.cl,"mEq")+electroRow("Kalsiyum",ET.ca,given.ca,"mEq")+electroRow("Magnezyum",ET.mg,given.mg,"mEq")+electroRow("Fosfat (nominal)",ET.phos,given.phos,"mEq");
+ var deficits=[];ks.forEach(function(k){if(isFinite(ET[k])&&isFinite(given[k])&&ET[k]>given[k])deficits.push(k.toUpperCase()+" "+F(ET[k]-given[k],1)+" mEq")});
+ var waterDef=isFinite(ET.water)?Math.max(0,ET.water-water):null;
+ if(E("route").value==="enteral"){
+   E("supplementAdvice").innerHTML="<b>Enteral sonrası ek parenteral/serbest sıvı:</b> "+(isFinite(waterDef)?F(waterDef,0)+" mL/gün":"manuel hedef gerekli")+(deficits.length?"<br><b>Elektrolit açığı:</b> "+deficits.join(", "):"");
+   E("microBlock").innerHTML="<p>Enteral ürünlerin tam vitamin/mikroelement içerikleri mevcut veri tabanında standartlaştırılmadığından otomatik eksik mikrobesin dozu hesaplanmıyor. Hedef hacim düşükse günlük önerilen ürün hacmi ve laboratuvarlara göre değerlendirin.</p>";
+ } else {
+   E("supplementAdvice").innerHTML="<b>PN torbasına göre ek elektrolit gereksinimi:</b> "+(deficits.length?deficits.join(", "):"hesaplanan hedefte belirgin açık yok")+(isFinite(waterDef)?"<br><b>Ek sıvı açığı:</b> "+F(waterDef,0)+" mL/gün":"");
+   var extraTh=(E("condition").value==="refeed"||E("condition").value==="refeedx")?"<tr><td>Ek tiamin</td><td>100 mg/gün, ilk 5–7 gün; ilk doz beslenme öncesi</td></tr>":"";
+   E("microBlock").innerHTML="<div class='scroll'><table><thead><tr><th>Katkı</th><th>Başlangıç günlük gereksinimi</th></tr></thead><tbody><tr><td>Erişkin parenteral multivitamin</td><td>Yerel preparatın 1 standart günlük dozu</td></tr><tr><td>Çinko</td><td>3–5 mg</td></tr><tr><td>Bakır</td><td>0,3–0,5 mg</td></tr><tr><td>Manganez</td><td>≈55 µg</td></tr><tr><td>Selenyum</td><td>60–100 µg</td></tr><tr><td>İyot</td><td>≈130 µg</td></tr><tr><td>Molibden</td><td>≈20–25 µg</td></tr>"+extraTh+"</tbody></table></div><p class='small'>Kolestaz, CRRT, büyük yara/Gİ kayıpları ve uzun süreli PN'de mikroelement dozları bireyselleştirilmelidir.</p>";
+ }
+ var warnings=[];
+ if(T.manual&&E("emode").value!=="manual")warnings.push("Bu klinik durumda su ve elektrolit hedeflerini manuel girin; otomatik bakım değerleri kullanılmamalıdır.");
+ if(proteinTarget>0&&protein<0.9*proteinTarget)warnings.push("Enerji hedefli ürün hızında protein hedefinin %90'ından azı sağlanıyor. Yalnız protein için hızı artırmak aşırı enerjiye yol açabilir.");
+ if(E("route").value==="enteral"&&Pdt.electrolyteStatus!=="Tam")warnings.push("Seçilen enteral ürünün elektrolit verisi eksik/kısmi olabilir; boş değerler sıfır değildir.");
+ if(R.title.indexOf("PARENTERAL")>=0&&E("route").value==="enteral")warnings.push("Beslenme yolu karar desteği parenteral yolu değerlendirmeyi öneriyor; seçimi yeniden değerlendirin.");
+ if(R.title.indexOf("ENTERAL")>=0&&E("route").value==="parenteral")warnings.push("GİS kullanılabilir görünüyor; enteral yol önceliğini yeniden değerlendirin.");
+ if(E("condition").value==="crrt")warnings.push("CRRT'de sitrat/IV glukoz kalorileri, effluent dozu ve amino asit/mikroelement kayıpları ayrıca hesaba katılmalıdır.");
+ if(!warnings.length)warnings.push("Hesaplama tamamlandı; klinik ve laboratuvar doğrulaması gereklidir.");
+ E("warnings").innerHTML=warnings.map(function(x){return "<div class='status warn'>"+x+"</div>"}).join("");
+ setStatus(E("runtime"),"ok","Hesaplama başarıyla tamamlandı.");
+}
+function safeCalc(){try{calculate()}catch(err){setStatus(E("runtime"),"bad","Çalışma hatası: "+(err&&err.message?err.message:err));console.error(err)}}
+E("route").addEventListener("change",function(){toggle();safeCalc()});
+E("emode").addEventListener("change",function(){toggle();safeCalc()});
+E("calcBtn").addEventListener("click",safeCalc);
+E("printBtn").addEventListener("click",function(){window.print()});
+["weight","height","sex","dry","phase","condition","ic","propofol","otherKcal","lossL","level","oral","map","pressor","gi","risk","days","enPct","grv","enProduct","pnProduct","mWater","mNa","mK","mCl","mCa","mMg","mPhos"].forEach(function(id){E(id).addEventListener("change",safeCalc)});
+["ischemia","obstruction","acs","bleed","fistula","intolerance"].forEach(function(id){E(id).addEventListener("change",safeCalc)});
+toggle();safeCalc();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./sw.js").catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
