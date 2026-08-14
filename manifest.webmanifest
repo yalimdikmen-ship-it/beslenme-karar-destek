@@ -1,7 +1,7 @@
 {
   "name": "MASTER Erişkin Yoğun Bakım Beslenme Karar Destek Sistemi",
   "short_name": "MASTER Nutrisyon",
-  "description": "ASPEN + ESPEN birleşik hedef motoru ile erişkin yoğun bakım beslenme karar desteği.",
+  "description": "ASPEN + ESPEN birleşik hedef motoru ile erişkin yoğun bakım nütrisyon karar desteği.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

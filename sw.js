@@ -1,4 +1,4 @@
-const CACHE_NAME = 'master-nutrisyon-v5-1';
+const CACHE_NAME = 'master-nutrisyon-v5-3';
 const ASSETS = [
   './',
   './index.html',
