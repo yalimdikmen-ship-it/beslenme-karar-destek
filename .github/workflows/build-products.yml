@@ -1,1 +1,40 @@
+name: Build nutrition product data
 
+on:
+  push:
+    paths:
+      - 'data/products.xlsx'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-products:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install XLSX reader
+        run: npm install --no-save xlsx@0.18.5
+
+      - name: Build JSON from Excel
+        run: node scripts/build-products.mjs
+
+      - name: Commit generated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/products.json data/version.json
+          if git diff --cached --quiet; then
+            echo "Generated data unchanged."
+          else
+            git commit -m "Update nutrition product JSON from products.xlsx"
+            git push
+          fi
